@@ -5,6 +5,7 @@ const { Translate } = require('@google-cloud/translate').v2;
 const app = express();
 const cors = require('cors');
 app.use(cors());
+const port = process.env.PORT || 1337;
 
 const translate = new Translate();
 
@@ -40,6 +41,6 @@ app.get('/detect', async (req, res) => {
 });
 
 // Start the server
-app.listen(1337, () => {
+app.listen(port, () => {
   console.log('Server is running on port 1337');
 });
