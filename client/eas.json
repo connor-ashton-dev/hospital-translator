@@ -22,7 +22,10 @@
       "ios": {
         "resourceClass": "m1-medium"
       },
-      "channel": "production"
+      "channel": "production",
+      "env": {
+        "EXPO_PUBLIC_OPENAI_API_KEY": "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"
+      }
     }
   },
   "submit": {
