@@ -53,7 +53,7 @@ export default function Recorder() {
     else myLocale = 'en';
 
     const res = await fetch(
-      'https://hospital-translator-production.up.railway.app/translate?text=' +
+      'https://hospital-translator.uc.r.appspot.com/translate?text=' +
         encodeURIComponent(text) +
         '&target=' +
         myLocale
@@ -64,7 +64,7 @@ export default function Recorder() {
 
   async function detect(text: string) {
     const res = await fetch(
-      'https://hospital-translator-production.up.railway.app/detect?text=' +
+      'https://hospital-translator.uc.r.appspot.com/detect?text=' +
         encodeURIComponent(text)
     );
     const json = await res.json();
