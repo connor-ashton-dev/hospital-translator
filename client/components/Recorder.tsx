@@ -53,7 +53,7 @@ export default function Recorder() {
     else myLocale = 'en';
 
     const res = await fetch(
-      'http://192.168.86.191:1337/translate?text=' +
+      'https://hospital-translator.uc.r.appspot.com/translate?text=' +
         encodeURIComponent(text) +
         '&target=' +
         myLocale
@@ -64,7 +64,8 @@ export default function Recorder() {
 
   async function detect(text: string) {
     const res = await fetch(
-      'http://192.168.86.191:1337/detect?text=' + encodeURIComponent(text)
+      'https://hospital-translator.uc.r.appspot.com/detect?text=' +
+        encodeURIComponent(text)
     );
     const json = await res.json();
     return json.message;
