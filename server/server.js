@@ -1,9 +1,9 @@
-const express = require('express');
-const bodyParser = require('body-parser'); // Middleware to parse JSON data
-const { Translate } = require('@google-cloud/translate').v2;
+const express = require("express");
+const bodyParser = require("body-parser"); // Middleware to parse JSON data
+const { Translate } = require("@google-cloud/translate").v2;
 
 const app = express();
-const cors = require('cors');
+const cors = require("cors");
 app.use(cors());
 const port = process.env.PORT || 1337;
 
@@ -25,7 +25,7 @@ async function detectLanguage(text) {
 }
 
 // GET request to translate text
-app.get('/translate', async (req, res) => {
+app.get("/translate", async (req, res) => {
   const data = req.query;
   console.log(data);
 
@@ -34,18 +34,18 @@ app.get('/translate', async (req, res) => {
   res.send(JSON.stringify({ message: translation }));
 });
 
-app.get('/detect', async (req, res) => {
+app.get("/detect", async (req, res) => {
   const data = req.query;
   const { text } = data;
   const detection = await detectLanguage(text);
   res.send(JSON.stringify({ message: detection }));
 });
 
-app.get('/checkhealth', (req, res) => {
-  res.send('Server is running');
+app.get("/checkhealth", (req, res) => {
+  res.send("Server is running");
 });
 
 // Start the server
 app.listen(port, () => {
-  console.log('Server is running on port ' + port);
+  console.log("Server is running on port " + port);
 });
