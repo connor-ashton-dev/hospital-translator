@@ -8,6 +8,9 @@ client/.expo/
 client/dist/
 client/web-build/
 client/.env
+client/eas.json
+# server/.env
+# server/creds.json
 
 # Native
 client/*.orig.*
