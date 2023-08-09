@@ -49,7 +49,6 @@ export default function Recorder() {
   async function translate(text: string, locale: string) {
     //TODO: Fix this
     let myLocale = "";
-    console.log(locale);
     if (locale == "en") myLocale = "es";
     else myLocale = "en";
 
@@ -59,8 +58,14 @@ export default function Recorder() {
         "&target=" +
         myLocale
     );
-    const json = await res.json();
-    return json.message;
+
+    try {
+      const json = await res.json();
+      return json.message;
+    } catch (error) {
+      console.log("error with translating", error);
+      return "";
+    }
   }
 
   async function detect(text: string) {
@@ -68,8 +73,12 @@ export default function Recorder() {
       "https://hospital-translator.uc.r.appspot.com/detect?text=" +
         encodeURIComponent(text)
     );
-    const json = await res.json();
-    return json.message;
+    try {
+      const json = await res.json();
+      return json.message;
+    } catch (error) {
+      console.log("error with detecting");
+    }
   }
 
   async function speak(text: string, locale: string) {
