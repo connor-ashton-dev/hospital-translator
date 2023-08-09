@@ -86,7 +86,10 @@ export default function Recorder() {
     if (locale == "en") myLocale = "es";
     else myLocale = "en";
     const res = await fetch(
-      "http://192.168.86.191:8080/speak?text=" + text + "&lang=" + myLocale
+      "http://hospital-translator.uc.r.appspot.com/speak?text=" +
+        text +
+        "&lang=" +
+        myLocale
     );
     const data = await res.json();
     const base64 = data.message;
