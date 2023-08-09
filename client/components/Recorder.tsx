@@ -1,13 +1,14 @@
-import { Text, TouchableOpacity, View } from 'react-native';
-import React, { useState } from 'react';
-import { Audio } from 'expo-av';
-import { FontAwesome } from '@expo/vector-icons';
+import { Text, TouchableOpacity, View } from "react-native";
+import React, { useEffect, useState } from "react";
+import { Audio } from "expo-av";
+import { FontAwesome } from "@expo/vector-icons";
+import * as FileSystem from "expo-file-system";
 
 export default function Recorder() {
   const [audioClip, setAudioClip] = useState<Audio.Recording>();
   const [isRecording, setIsRecording] = useState(false);
-  const [uri, setUri] = useState<string>('');
-  const [text, setText] = useState<string>('');
+  const [uri, setUri] = useState<string>("");
+  const [text, setText] = useState<string>("");
   const [loading, setLoading] = useState(false);
 
   async function startRecording() {
@@ -24,7 +25,7 @@ export default function Recorder() {
       );
       setAudioClip(recording);
     } catch (err) {
-      console.error('Failed to start recording', err);
+      console.error("Failed to start recording", err);
     }
   }
 
@@ -47,15 +48,15 @@ export default function Recorder() {
 
   async function translate(text: string, locale: string) {
     //TODO: Fix this
-    let myLocale = '';
+    let myLocale = "";
     console.log(locale);
-    if (locale == 'en') myLocale = 'es';
-    else myLocale = 'en';
+    if (locale == "en") myLocale = "es";
+    else myLocale = "en";
 
     const res = await fetch(
-      'https://hospital-translator.uc.r.appspot.com/translate?text=' +
+      "https://hospital-translator.uc.r.appspot.com/translate?text=" +
         encodeURIComponent(text) +
-        '&target=' +
+        "&target=" +
         myLocale
     );
     const json = await res.json();
@@ -64,26 +65,52 @@ export default function Recorder() {
 
   async function detect(text: string) {
     const res = await fetch(
-      'https://hospital-translator.uc.r.appspot.com/detect?text=' +
+      "https://hospital-translator.uc.r.appspot.com/detect?text=" +
         encodeURIComponent(text)
     );
     const json = await res.json();
     return json.message;
   }
 
+  async function speak(text: string, locale: string) {
+    let myLocale = "";
+    if (locale == "en") myLocale = "es";
+    else myLocale = "en";
+    const res = await fetch(
+      "https://hospital-translator.uc.r.appspot.com/speak?text=" +
+        text +
+        "&lang=" +
+        myLocale
+    );
+    const data = await res.json();
+    const base64 = data.message;
+    const soundObject = new Audio.Sound();
+
+    try {
+      // You might need a data URI depending on how Expo handles base64 strings
+      await soundObject.loadAsync({
+        uri: `data:audio/mp3;base64,${base64}`,
+      });
+      await soundObject.playAsync();
+    } catch (error) {
+      // Handle the error accordingly
+      console.error("Error playing the audio", error);
+    }
+  }
+
   async function parseAudio(uri: string) {
-    const fileUri = uri.replace('file://', '');
-    const file = { uri: fileUri, name: 'recording.m4a', type: 'audio/m4a' };
+    const fileUri = uri.replace("file://", "");
+    const file = { uri: fileUri, name: "recording.m4a", type: "audio/m4a" };
     const formData = new FormData();
-    formData.append('model', 'whisper-1');
-    formData.append('file', file as unknown as Blob);
-    formData.append('response_format', 'text');
-    const res = await fetch('https://api.openai.com/v1/audio/transcriptions', {
+    formData.append("model", "whisper-1");
+    formData.append("file", file as unknown as Blob);
+    formData.append("response_format", "text");
+    const res = await fetch("https://api.openai.com/v1/audio/transcriptions", {
       headers: {
-        Authorization: 'Bearer ' + process.env.EXPO_PUBLIC_OPENAI_API_KEY,
-        'Content-Type': 'multipart/form-data',
+        Authorization: "Bearer " + process.env.EXPO_PUBLIC_OPENAI_API_KEY,
+        "Content-Type": "multipart/form-data",
       },
-      method: 'POST',
+      method: "POST",
       body: formData,
     });
     const text = await res.text();
@@ -92,29 +119,30 @@ export default function Recorder() {
     const locale = detection.language;
 
     const translatedText = await translate(text, locale);
+    speak(translatedText, locale);
 
     setText(translatedText);
     setLoading(false);
   }
   return (
     <>
-      <View className='h-72 w-full my-20 p-4 rounded-xl bg-white shadow'>
+      <View className="h-72 w-full my-20 p-4 rounded-xl bg-white shadow">
         {/*TODO: Make scrollable  */}
         <Text>
-          {loading ? 'Loading ...' : text}
+          {loading ? "Loading ..." : text}
           {text.length === 0 && !loading
-            ? 'Press record to start translating...'
-            : ''}
+            ? "Press record to start translating..."
+            : ""}
         </Text>
       </View>
       <TouchableOpacity
-        className='bg-blue-500 flex items-center justify-center w-20 h-20 rounded-full shadow'
+        className="bg-blue-500 flex items-center justify-center w-20 h-20 rounded-full shadow"
         onPress={isRecording ? stopRecording : startRecording}
       >
         {isRecording ? (
-          <FontAwesome name='microphone-slash' size={40} color='white' />
+          <FontAwesome name="microphone-slash" size={40} color="white" />
         ) : (
-          <FontAwesome name='microphone' size={40} color='white' />
+          <FontAwesome name="microphone" size={40} color="white" />
         )}
       </TouchableOpacity>
     </>
