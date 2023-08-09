@@ -52,6 +52,8 @@ export default function Recorder() {
     if (locale == "en") myLocale = "es";
     else myLocale = "en";
 
+    console.log(myLocale);
+
     const res = await fetch(
       "https://hospital-translator.uc.r.appspot.com/translate?text=" +
         encodeURIComponent(text) +
@@ -86,10 +88,7 @@ export default function Recorder() {
     if (locale == "en") myLocale = "es";
     else myLocale = "en";
     const res = await fetch(
-      "https://hospital-translator.uc.r.appspot.com/speak?text=" +
-        text +
-        "&lang=" +
-        myLocale
+      "http://192.168.86.191:8080/speak?text=" + text + "&lang=" + myLocale
     );
     const data = await res.json();
     const base64 = data.message;
@@ -124,8 +123,8 @@ export default function Recorder() {
     });
     const text = await res.text();
 
-    const detection = await detect(text);
-    const locale = detection.language;
+    const locale = await detect(text);
+    console.log("langage = ", locale);
 
     const translatedText = await translate(text, locale);
     speak(translatedText, locale);

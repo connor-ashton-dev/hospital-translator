@@ -19,17 +19,6 @@ async function translateText(text, target) {
   return translations[0];
 }
 
-async function listVoices(languageCode) {
-  const client = new textToSpeech.TextToSpeechClient();
-
-  const [result] = await client.listVoices({ languageCode });
-  const voices = result.voices;
-
-  voices.forEach((voice) => {
-    console.log(`${voice.name} (${voice.ssmlGender}): ${voice.languageCodes}`);
-  });
-}
-
 async function synthesize(text, lang) {
   const textToSpeech = require("@google-cloud/text-to-speech");
 
