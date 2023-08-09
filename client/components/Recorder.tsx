@@ -52,8 +52,6 @@ export default function Recorder() {
     if (locale == "en") myLocale = "es";
     else myLocale = "en";
 
-    console.log(myLocale);
-
     const res = await fetch(
       "https://hospital-translator.uc.r.appspot.com/translate?text=" +
         encodeURIComponent(text) +
@@ -124,7 +122,6 @@ export default function Recorder() {
     const text = await res.text();
 
     const locale = await detect(text);
-    console.log("langage = ", locale);
 
     const translatedText = await translate(text, locale);
     speak(translatedText, locale);
