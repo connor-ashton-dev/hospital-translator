@@ -57,7 +57,7 @@ app.get("/translate", async (req, res) => {
   const data = req.query;
   console.log(data);
 
-  const { text } = data;
+  const { text, target } = data;
   const translation = await translateText(text, target);
   res.send(JSON.stringify({ message: translation }));
 });
