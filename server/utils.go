@@ -70,7 +70,7 @@ func synthesizeText(w io.Writer, text, lang string) (string, error) {
 		// Names of voices can be retrieved with client.ListVoices().
 		Voice: &texttospeechpb.VoiceSelectionParams{
 			LanguageCode: lang,
-			SsmlGender:   texttospeechpb.SsmlVoiceGender_FEMALE,
+			SsmlGender:   texttospeechpb.SsmlVoiceGender_MALE,
 		},
 		AudioConfig: &texttospeechpb.AudioConfig{
 			AudioEncoding: texttospeechpb.AudioEncoding_MP3,
@@ -79,6 +79,7 @@ func synthesizeText(w io.Writer, text, lang string) (string, error) {
 
 	resp, err := client.SynthesizeSpeech(ctx, &req)
 	if err != nil {
+		fmt.Println("There was an error:", err)
 		return "", err
 	}
 

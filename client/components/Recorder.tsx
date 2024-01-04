@@ -1,10 +1,15 @@
 import { Text, TouchableOpacity, View } from "react-native";
 import React, { useEffect, useState } from "react";
+import * as FileSystem from "expo-file-system";
 import { Audio } from "expo-av";
 import { FontAwesome } from "@expo/vector-icons";
-import * as FileSystem from "expo-file-system";
+import { decode } from "html-entities";
 
-export default function Recorder() {
+type RecorderProps = {
+  value: string[];
+};
+
+export default function Recorder({ value }: RecorderProps) {
   const [audioClip, setAudioClip] = useState<Audio.Recording>();
   const [isRecording, setIsRecording] = useState(false);
   const [uri, setUri] = useState<string>("");
@@ -12,20 +17,24 @@ export default function Recorder() {
   const [loading, setLoading] = useState(false);
 
   async function startRecording() {
-    try {
-      await Audio.requestPermissionsAsync();
-      await Audio.setAudioModeAsync({
-        allowsRecordingIOS: true,
-        playsInSilentModeIOS: true,
-      });
+    if (value.length == 2) {
+      try {
+        await Audio.requestPermissionsAsync();
+        await Audio.setAudioModeAsync({
+          allowsRecordingIOS: true,
+          playsInSilentModeIOS: true,
+        });
 
-      setIsRecording(true);
-      const { recording } = await Audio.Recording.createAsync(
-        Audio.RecordingOptionsPresets.HIGH_QUALITY
-      );
-      setAudioClip(recording);
-    } catch (err) {
-      console.error("Failed to start recording", err);
+        setIsRecording(true);
+        const { recording } = await Audio.Recording.createAsync(
+          Audio.RecordingOptionsPresets.HIGH_QUALITY,
+        );
+        setAudioClip(recording);
+      } catch (err) {
+        console.error("Failed to start recording", err);
+      }
+    } else {
+      //TODO: Add error message
     }
   }
 
@@ -47,21 +56,26 @@ export default function Recorder() {
   }
 
   async function translate(text: string, locale: string) {
-    //TODO: Fix this
+    const locale1 = value[0];
+    const locale2 = value[1];
     let myLocale = "";
-    if (locale == "en") myLocale = "es";
-    else myLocale = "en";
+
+    if (locale == locale1) {
+      myLocale = locale2;
+    } else {
+      myLocale = locale1;
+    }
 
     const res = await fetch(
       "https://hospital-translator.uc.r.appspot.com/translate?text=" +
         encodeURIComponent(text) +
         "&target=" +
-        myLocale
+        myLocale,
     );
 
     try {
       const json = await res.json();
-      return json.message;
+      return decode(json.message);
     } catch (error) {
       console.log("error with translating", error);
       return "";
@@ -71,7 +85,7 @@ export default function Recorder() {
   async function detect(text: string) {
     const res = await fetch(
       "https://hospital-translator.uc.r.appspot.com/detect?text=" +
-        encodeURIComponent(text)
+        encodeURIComponent(text),
     );
     try {
       const json = await res.json();
@@ -82,28 +96,45 @@ export default function Recorder() {
   }
 
   async function speak(text: string, locale: string) {
+    const locale1 = value[0];
+    const locale2 = value[1];
     let myLocale = "";
-    if (locale == "en") myLocale = "es";
-    else myLocale = "en";
+
+    if (locale == locale1) {
+      myLocale = locale2;
+    } else {
+      myLocale = locale1;
+    }
+
     const res = await fetch(
-      "http://hospital-translator.uc.r.appspot.com/speak?text=" +
+      "https://hospital-translator.uc.r.appspot.com/speak?text=" +
         text +
         "&lang=" +
-        myLocale
+        myLocale,
     );
     const data = await res.json();
     const base64 = data.message;
-    const soundObject = new Audio.Sound();
+    const sound = new Audio.Sound();
 
     try {
-      // You might need a data URI depending on how Expo handles base64 strings
-      await soundObject.loadAsync({
-        uri: `data:audio/mp3;base64,${base64}`,
+      await FileSystem.writeAsStringAsync(
+        FileSystem.documentDirectory + "myText.mp3",
+        base64,
+        {
+          encoding: FileSystem.EncodingType.Base64,
+        },
+      );
+      await sound.loadAsync({
+        uri: FileSystem.documentDirectory + "myText.mp3",
       });
-      await soundObject.playAsync();
+
+      await sound.playAsync();
+      // delete file
     } catch (error) {
       // Handle the error accordingly
       console.error("Error playing the audio", error);
+    } finally {
+      await FileSystem.deleteAsync(FileSystem.documentDirectory + "myText.mp3");
     }
   }
 
@@ -134,7 +165,7 @@ export default function Recorder() {
   }
   return (
     <>
-      <View className="h-72 w-full my-20 p-4 rounded-xl bg-white shadow">
+      <View className="h-80 w-full mt-10 mb-20 p-4 rounded-xl bg-white shadow">
         {/*TODO: Make scrollable  */}
         <Text>
           {loading ? "Loading ..." : text}
